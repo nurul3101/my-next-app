@@ -1,15 +1,26 @@
 // ./app/api/hello/route.ts
-
-import { cookies } from "next/headers";
+import prisma from "../../database/prisma";
 
 export const runtime = "edge";
 
 export async function GET(request: Request) {
-  const cookieStore = cookies();
-  const token = cookieStore.get("token");
+  const quote = await prisma.quote.findFirst({});
 
-  return new Response("Hello, Next.js!", {
+  // Check if a quote was found
+  if (!quote) {
+    return new Response(JSON.stringify({ error: "No quote found" }), {
+      status: 404,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
+  // Respond with the quote in JSON format
+  return new Response(JSON.stringify({ quote: quote.text }), {
     status: 200,
-    headers: { "Set-Cookie": `token=${token}` },
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 }
