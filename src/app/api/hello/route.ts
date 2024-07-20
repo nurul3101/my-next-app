@@ -11,6 +11,10 @@ const prisma = new PrismaClient({ adapter });
 
 export const runtime = "edge";
 
+// disabling caching
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const quote = await prisma.quote.findFirst({});
