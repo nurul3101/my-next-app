@@ -11,14 +11,37 @@ const prisma = new PrismaClient({ adapter });
 
 export const runtime = "edge";
 
-export async function GET(request: Request) {
-  const quote = await prisma.quote.findFirst({});
-  console.log("quote", quote);
-  // Respond with the quote in JSON format
-  return new Response(JSON.stringify({ quote: quote?.text }), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+export async function GET() {
+  try {
+    const quote = await prisma.quote.findFirst({});
+
+    if (!quote) {
+      return new Response(JSON.stringify({ error: "No quote found" }), {
+        status: 404,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    }
+
+    return new Response(JSON.stringify({ quote: quote.text }), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  } catch (error) {
+    console.error("Failed to retrieve quote:", error);
+    return new Response(
+      JSON.stringify({ error: "Failed to process your request" }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  } finally {
+    await prisma.$disconnect();
+  }
 }
