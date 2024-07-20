@@ -3,12 +3,6 @@ import { Pool } from "@neondatabase/serverless";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@prisma/client";
 
-const connectionString = `${process.env.DATABASE_URL}`;
-
-const pool = new Pool({ connectionString });
-const adapter = new PrismaNeon(pool);
-const prisma = new PrismaClient({ adapter });
-
 export const runtime = "edge";
 
 // disabling caching
@@ -16,6 +10,12 @@ export const fetchCache = "force-no-store";
 export const revalidate = 0;
 
 export async function GET() {
+  const connectionString = `${process.env.DATABASE_URL}`;
+
+  const pool = new Pool({ connectionString });
+  const adapter = new PrismaNeon(pool);
+  const prisma = new PrismaClient({ adapter });
+
   try {
     const quote = await prisma.quote.findFirst({});
 
